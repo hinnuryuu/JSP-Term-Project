@@ -16,6 +16,7 @@ import java.util.Calendar;
 public class RegisterServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.setCharacterEncoding("utf-8");
         HttpSession session = request.getSession();
         Calendar cal = Calendar.getInstance();
         String email = request.getParameter("inputEmail");
@@ -30,12 +31,12 @@ public class RegisterServlet extends HttpServlet {
         try {
             if(db.existUser(email)){
                 session.setAttribute("existUser",true);
-                request.getRequestDispatcher("register.jsp").forward(request,response);
+                response.sendRedirect("register.jsp");
             }else {
                 session.setAttribute("existUser",false);
                 User user = new User(username,password,gender,age,email,0);
                 db.insert(user);
-                request.getRequestDispatcher("register.jsp").forward(request,response);
+                response.sendRedirect("register.jsp");
             }
         } catch (SQLException | ClassNotFoundException e) {
             throw new RuntimeException(e);

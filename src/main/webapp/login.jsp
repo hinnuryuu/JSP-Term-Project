@@ -34,8 +34,9 @@
     </script>
 </head>
 <%
+    request.setCharacterEncoding("utf-8");
     int existCookie = 0;
-    if(request.getCookies()!=null) {
+    if (request.getCookies() != null) {
         Cookie[] cookies = request.getCookies();
         for (Cookie cookie : cookies) {
             if (cookie.getName().equals("user")) {
@@ -50,6 +51,9 @@
 <script>window.location.href = 'LoginServlet';</script>
 <%
 } else {
+    if (session.getAttribute("upRight")!=null && (boolean) session.getAttribute("upRight")) {
+        response.sendRedirect("index.jsp");
+    } else {
 %>
 <body style="background-image: url('bg-login.jpg');background-repeat: no-repeat;background-size: cover">
 
@@ -90,21 +94,19 @@
     </script>
     <%
         session.setAttribute("captchaRight", null);
-    } else {
-        if ((boolean) session.getAttribute("upRight")) {
-            session.setAttribute("userLogin", true);
-        } else {
+    } else if (!(boolean) session.getAttribute("upRight")) {
     %>
     <script>
         window.alert("电子邮箱或密码错误！");
     </script>
     <%
-                }
+                session.setAttribute("captchaRight", null);
             }
         }
     %>
 </div> <!-- /container -->
 <%
+        }
     }
 %>
 

@@ -7,7 +7,7 @@ public class UserDB {
     static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/userinfo?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&useUnicode=true";
     static final String USER = "root";
-    static final String PASS = "lby20020206";
+    static final String PASS = "123456";
     Connection conn = null;
     Statement stmt = null;
 
@@ -37,9 +37,9 @@ public class UserDB {
         disconnect();
     }
 
-    public void update(User user) throws SQLException, ClassNotFoundException {
+    public void update(User user, String id, String password, String gender, int age, String email) throws SQLException, ClassNotFoundException {
         connect();
-        String sql = "update user_data set id='" + user.getId() + "',pwd='" + user.getPwd() + "',gender='" + user.getGender() + "',age=" + user.getAge() + ",admin=" + user.getAdmin() + " where email='" + user.getEmail() + "'";
+        String sql = "update user_data set id='" + id + "',pwd='" + password + "',gender='" + gender + "',email='" + email + "',age=" + age + " where email='" + user.getEmail() + "'";
         int rs = stmt.executeUpdate(sql);
         disconnect();
     }
@@ -66,18 +66,38 @@ public class UserDB {
         return row != 0;
     }
 
+    public User searchByEmail(String email) {
+        try {
+            connect();
+            String sql = "select * from user_data where email='" + email + "'";
+            ResultSet rs = stmt.executeQuery(sql);
+            rs.next();
+            User user = new User(rs.getString("id"), rs.getString("pwd"), rs.getString("gender"), rs.getInt("age"), rs.getString("email"), rs.getInt("admin"));
+            disconnect();
+            return user;
+        } catch (SQLException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public User searchByEmailPassword(String email, String password) {
-        User user = null;
         try {
             connect();
             String sql = "select * from user_data where email='" + email + "' and pwd='" + password + "'";
             ResultSet rs = stmt.executeQuery(sql);
             rs.next();
-            user = new User(rs.getString("id"), rs.getString("pwd"), rs.getString("gender"), rs.getInt("age"), rs.getString("email"), rs.getInt("admin"));
+            if (rs.getRow() == 0) return null;
+            User user = new User(rs.getString("id"), rs.getString("pwd"), rs.getString("gender"), rs.getInt("age"), rs.getString("email"), rs.getInt("admin"));
             disconnect();
+            return user;
         } catch (SQLException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
-        return user;
+    }
+    public void switchAuthority(User user,int admin) throws SQLException, ClassNotFoundException {
+        connect();
+        String sql = "update user_data set admin="+admin+" where email='"+ user.getEmail() +"'";
+        int rs = stmt.executeUpdate(sql);
+        disconnect();
     }
 }

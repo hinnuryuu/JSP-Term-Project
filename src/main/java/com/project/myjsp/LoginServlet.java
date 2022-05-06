@@ -14,7 +14,8 @@ public class LoginServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        request.setCharacterEncoding("utf-8");
         String email = "", password = "";
         int existCookie = 0;
         Cookie[] cookies = request.getCookies();
@@ -34,19 +35,19 @@ public class LoginServlet extends HttpServlet {
             password = request.getParameter("inputPassword");
         }
         String givenCaptcha = "", realCaptcha = "";
-        String remember = "";
+        String remember;
         boolean rememberMe = false;
         if (existCookie != 2) {
             givenCaptcha = (request.getParameter("inputCaptcha")).toLowerCase();
             realCaptcha = ((String) request.getSession().getAttribute("captcha")).toLowerCase();
-            remember = request.getParameter("remember")==null?"null":"remember-me";
-            rememberMe= remember.equals("remember-me");
+            remember = request.getParameter("remember") == null ? "null" : "remember-me";
+            rememberMe = remember.equals("remember-me");
         }
         UserDB db = new UserDB();
         if (givenCaptcha.equals(realCaptcha) && existCookie < 2) {
             session.setAttribute("captchaRight", true);
             try {
-                if (db.checkRightUser(email, password)&&rememberMe) {
+                if (db.checkRightUser(email, password) && rememberMe) { // 设置cookie
                     Cookie user = new Cookie("user", email);
                     Cookie pwd = new Cookie("password", password);
                     user.setMaxAge(3600);
@@ -54,13 +55,15 @@ public class LoginServlet extends HttpServlet {
                     response.addCookie(user);
                     response.addCookie(pwd);
                     session.setAttribute("upRight", true);
-                    request.getRequestDispatcher("index.jsp").forward(request, response);
-                } else if (db.checkRightUser(email, password)&&!rememberMe) {
+                    session.setAttribute("loginEmail", email);
+                    response.sendRedirect("index.jsp");
+                } else if (db.checkRightUser(email, password) && !rememberMe) { // 不设置cookie
                     session.setAttribute("upRight", true);
-                    request.getRequestDispatcher("index.jsp").forward(request, response);
+                    session.setAttribute("loginEmail", email);
+                    response.sendRedirect("index.jsp");
                 } else {
                     session.setAttribute("upRight", false);
-                    request.getRequestDispatcher("login.jsp").forward(request, response);
+                    response.sendRedirect("login.jsp");
                 }
             } catch (SQLException | ClassNotFoundException e) {
                 throw new RuntimeException(e);
@@ -69,10 +72,20 @@ public class LoginServlet extends HttpServlet {
             try {
                 if (db.checkRightUser(email, password)) {
                     session.setAttribute("upRight", true);
-                    request.getRequestDispatcher("index.jsp").forward(request, response);
+                    session.setAttribute("loginEmail", email);
+                    response.sendRedirect("index.jsp");
                 } else {
                     session.setAttribute("upRight", false);
-                    request.getRequestDispatcher("login.jsp").forward(request, response);
+                    for (Cookie cookie : cookies) {
+                        if (cookie.getName().equals("user")) {
+                            cookie.setMaxAge(0);
+                            response.addCookie(cookie);
+                        } else if (cookie.getName().equals("password")) {
+                            cookie.setMaxAge(0);
+                            response.addCookie(cookie);
+                        }
+                    }
+                    response.sendRedirect("login.jsp");
                 }
             } catch (SQLException | ClassNotFoundException e) {
                 throw new RuntimeException(e);
@@ -80,7 +93,7 @@ public class LoginServlet extends HttpServlet {
         } else {
             session.setAttribute("captchaRight", false);
             session.setAttribute("upRight", false);
-            request.getRequestDispatcher("login.jsp").forward(request, response);
+            response.sendRedirect("login.jsp");
         }
     }
 }

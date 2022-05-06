@@ -28,6 +28,7 @@
     <![endif]-->
 </head>
 <%
+    request.setCharacterEncoding("utf-8");
     if (session.getAttribute("upRight") != null) {
         if ((boolean) session.getAttribute("upRight")) {
             response.sendRedirect("index.jsp");

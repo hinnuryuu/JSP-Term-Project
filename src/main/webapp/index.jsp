@@ -45,7 +45,7 @@
                             <li><a href="login.jsp">登录</a></li>
                             <li><a href="register.jsp">注册</a></li>
                             <%
-                                }else {
+                            } else {
                             %>
                             <li><a href="profile.jsp">个人信息</a></li>
                             <li><a href="LogoutServlet">退出登录</a></li>
@@ -67,7 +67,7 @@
 
             <div class="mastfoot">
                 <div class="inner">
-                    <p>由<a href="https://getbootstrap.com/">Bootstrap 3</a>实现页面布局 , 刘斌羽将此作业已开源于 <a
+                    <p>由<a href="https://getbootstrap.com/">Bootstrap 3</a>实现页面布局 , 将此作业已开源于 <a
                             href="https://github.com/hinnuryuu">Github</a>.</p>
                 </div>
             </div>
